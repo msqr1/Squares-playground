@@ -149,14 +149,16 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 		}
 		case 2: {
 			Info_Reply res{ std::get<2>(message) };
-			std::cout << "Received iRep: \n";
-			std::cout << "Newindex: " << static_cast<int>(res.nIndex) << '\n';
-			std::cout << "Init pos: " << res.tsqr.posx << ',' << res.tsqr.posy << '\n';
-			c.try_emplace(res.tsqr.index, std::make_unique<Square>(res.tsqr));
-			if (res.nIndex != store) {
-				tsqr.index = res.nIndex;
-				indexset.erase(res.nIndex);
-				store = res.nIndex;
+			if(!c.contains(res.tsqr.index)) {
+				std::cout << "Received iRep: \n";
+				std::cout << "Newindex: " << static_cast<int>(res.nIndex) << '\n';
+				std::cout << "Init pos: " << res.tsqr.posx << ',' << res.tsqr.posy << '\n';
+				c.try_emplace(res.tsqr.index, std::make_unique<Square>(res.tsqr));
+				if (res.nIndex != store) {
+					tsqr.index = res.nIndex;
+					indexset.erase(res.nIndex);
+					store = res.nIndex;
+				}
 			}
 			break;
 		}
