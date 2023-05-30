@@ -36,7 +36,6 @@ int_least32_t main() {
 	phost_b phs{};
 	//Networking
 	sockaddr_in dest{};
-	group_req grstruct{};
 	SOCKET tsock{};
 	Square tsqr{};
 	Sqrc squares{};
