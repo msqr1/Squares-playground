@@ -1,7 +1,6 @@
 #pragma once
-#include <string>
 #include <unordered_map>
-#include <memory>
+#include <bitset>
 struct Square
 {
 	Square(const char* name, uint_least8_t index, uint_least8_t r, uint_least8_t g, uint_least8_t b);
@@ -13,5 +12,6 @@ struct Square
 	uint_least8_t g{};
 	uint_least8_t b{};
 	uint_least8_t index{};
+	std::bitset<4> controls{};
 };
 typedef std::unordered_map <uint_least8_t, std::unique_ptr<Square>> Sqrc;
