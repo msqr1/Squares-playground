@@ -4,13 +4,12 @@ updater::updater(SDL_Window* win, SDL_Renderer* ren, uint_least8_t* gamestate, S
 	: win(win), ren(ren), gamestate(gamestate), ev(ev) {
 	SDL_GetWindowSize(win, &this->winsizex, &this->winsizey);
 }
-
 updater* updater::draw_sqr(Square& sqr) {
-	SDL_Rect todraw{std::lroundl(sqr.posx), std::lround(sqr.posy), P_SIZE, P_SIZE };
+	SDL_Rect todraw{ std::lroundl(sqr.posx), std::lround(sqr.posy), P_SIZE, P_SIZE };
 	SDL_SetRenderDrawColor(this->ren, sqr.r, sqr.g, sqr.b, 0);
 	SDL_RenderDrawRect(this->ren, &todraw);
 	SDL_RenderFillRect(this->ren, &todraw);
-	SDL_SetRenderDrawColor(this->ren, 255,255,255,0);
+	SDL_SetRenderDrawColor(this->ren, 255, 255, 255, 0);
 	return this;
 }
 updater* updater::handle_input(Square& sqr, double fps) {
@@ -63,10 +62,10 @@ updater* updater::draw_titles(title& title) {
 	SDL_Surface* surface{};
 	switch (*this->gamestate) {
 	case 0:
-		surface = TTF_RenderUTF8_Blended(title.font,title.ttd,title.color);
+		surface = TTF_RenderUTF8_Blended(title.font, title.ttd, title.color);
 		break;
 	case 1:
-		surface = TTF_RenderUTF8_Blended(title.joinfont,title.jointtd,title.color);
+		surface = TTF_RenderUTF8_Blended(title.joinfont, title.jointtd, title.color);
 		break;
 	case 3:
 		surface = TTF_RenderUTF8_Blended(title.hostfont, title.hostttd, title.color);
@@ -77,7 +76,7 @@ updater* updater::draw_titles(title& title) {
 	if (*this->gamestate == 0) {
 		texW += static_cast<int_least32_t>(texW * 0.3); //Stretch the text width by 1.3 times
 	}
-	SDL_Rect dstrect = { static_cast<int_least32_t>(winsizex/2-texW/2),static_cast<int_least32_t>(winsizey/4-texH/1.5), texW, texH };
+	SDL_Rect dstrect = { static_cast<int_least32_t>(winsizex / 2 - texW / 2),static_cast<int_least32_t>(winsizey / 4 - texH / 1.5), texW, texH };
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
@@ -97,18 +96,20 @@ updater* updater::handle_host_b(host_b& host) {
 		if (x > static_cast<int_least32_t>(winsizex / 2 - texW / 2) && x < static_cast<int_least32_t>(winsizex / 2 - texW / 2) + texW) {
 			host.color = host.selectcolor;
 			if ((buttons & SDL_BUTTON_LMASK) != 0) {
-				changeto(*this->gamestate, 3);
+				*this->gamestate = 3;
 				SDL_Delay(110);
 			}
-		}else { host.color = host.storage; }
-	} else { host.color = host.storage; }
+		}
+		else { host.color = host.storage; }
+	}
+	else { host.color = host.storage; }
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
 	return this;
 }
 updater* updater::handle_join_b(join_b& join) {
-	SDL_Surface* surface{ TTF_RenderUTF8_Shaded(join.font, join.ttd, join.color, join.boxcolor)};
+	SDL_Surface* surface{ TTF_RenderUTF8_Shaded(join.font, join.ttd, join.color, join.boxcolor) };
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
@@ -121,11 +122,13 @@ updater* updater::handle_join_b(join_b& join) {
 		if (x > static_cast<int_least32_t>(winsizex / 2 - texW / 2) && x < static_cast<int_least32_t>(winsizex / 2 - texW / 2) + texW) {
 			join.color = join.selectcolor;
 			if ((buttons & SDL_BUTTON_LMASK) != 0) {
-				changeto(*this->gamestate, 1);
+				*this->gamestate = JOINMENU;
 			}
-		}else { join.color = join.storage; }
-		
-	}else { join.color = join.storage; }
+		}
+		else { join.color = join.storage; }
+
+	}
+	else { join.color = join.storage; }
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
@@ -145,10 +148,12 @@ updater* updater::handle_tomenu_b(tomenu_b& tmn) {
 		if (x > 10 && x < 10 + texW) {
 			tmn.color = tmn.selectcolor;
 			if ((buttons & SDL_BUTTON_LMASK) != 0) {
-				changeto(*this->gamestate, 0);
+				*this->gamestate = MAINMENU;
 			}
-		}else { tmn.color = tmn.storage; }
-	}else { tmn.color = tmn.storage; }
+		}
+		else { tmn.color = tmn.storage; }
+	}
+	else { tmn.color = tmn.storage; }
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
@@ -168,10 +173,12 @@ updater* updater::handle_lchost_b(lchost_b& lct) {
 		if (x > static_cast<int_least32_t>(winsizex / 2 - texW / 2) && x < static_cast<int_least32_t>(winsizex / 2 - texW / 2) + texW) {
 			lct.color = lct.selectcolor;
 			if ((buttons & SDL_BUTTON_LMASK) != 0) {
-				changeto(*this->gamestate, 4);
+				*this->gamestate = 4;
 			}
-		} else { lct.color = lct.storage; }
-	} else { lct.color = lct.storage; }
+		}
+		else { lct.color = lct.storage; }
+	}
+	else { lct.color = lct.storage; }
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
@@ -191,26 +198,28 @@ updater* updater::handle_phost_b(phost_b& phs) {
 		if (x > static_cast<int_least32_t>(winsizex / 2 - texW / 2) && x < static_cast<int_least32_t>(winsizex / 2 - texW / 2) + texW) {
 			phs.color = phs.selectcolor;
 			if ((buttons & SDL_BUTTON_LMASK) != 0) {
-				changeto(*this->gamestate, 2);
+				*this->gamestate = 2;
 			}
-		}else { phs.color = phs.storage; }
-	}else { phs.color = phs.storage; }
+		}
+		else { phs.color = phs.storage; }
+	}
+	else { phs.color = phs.storage; }
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
 	return this;
 }
 updater* updater::handle_hostinfo(hostinfo& hif) {
-	SDL_Surface* surface{ TTF_RenderUTF8_Shaded(hif.font,(' ' + hif.ttd + ' ').c_str(),hif.color,hif.boxcolor)};
+	SDL_Surface* surface{ TTF_RenderUTF8_Shaded(hif.font,(' ' + hif.ttd + ' ').c_str(),hif.color,hif.boxcolor) };
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
-	SDL_Rect dstrect = { this->winsizex-texW,this->winsizey-texH, texW, texH };
+	SDL_Rect dstrect = { this->winsizex - texW,this->winsizey - texH, texW, texH };
 	int_least32_t x{}, y{};
 	SDL_PumpEvents();
 	uint_least32_t buttons{ SDL_GetMouseState(&x, &y) };
 	if ((y > static_cast<int_least32_t>(winsizey - texH) && y < this->winsizey)
-	&& (x > static_cast<int_least32_t>(winsizex - texW) && x < this->winsizex)) {
+		&& (x > static_cast<int_least32_t>(winsizex - texW) && x < this->winsizex)) {
 		hif.ttd = "   Copy!   ";
 		if ((buttons & SDL_BUTTON_LMASK) != 0) {
 			hif.cpy2clip();
@@ -228,7 +237,7 @@ updater* updater::handle_field(field& cfd, sockaddr_in& dest) {
 	switch (this->ev->type) {
 	case SDL_TEXTINPUT:
 		if (cfd.ttd.length() > 5) { SDL_StopTextInput(); break; }
-		else { SDL_StartTextInput(); cfd.ttd += this->ev->text.text; break;}
+		else { SDL_StartTextInput(); cfd.ttd += this->ev->text.text; break; }
 	case SDL_KEYDOWN:
 		switch (this->ev->key.keysym.scancode) {
 		case SDL_SCANCODE_BACKSPACE:
@@ -239,13 +248,14 @@ updater* updater::handle_field(field& cfd, sockaddr_in& dest) {
 				cfd.handle_paste();
 			}
 			break;
+		case SDL_SCANCODE_RETURN:
 		case SDL_SCANCODE_KP_ENTER:
-			dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd)/3);
+			dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd) / 3);
 			*this->gamestate = PREJOIN;
 			break;
 		}
 	}
-	SDL_Surface* surface{ TTF_RenderUTF8_Blended(cfd.font,cfd.ttd.c_str(),cfd.textcolor)};
+	SDL_Surface* surface{ TTF_RenderUTF8_Blended(cfd.font,cfd.ttd.c_str(),cfd.textcolor) };
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
@@ -271,7 +281,7 @@ updater* updater::draw_enter2join(enter2join& e2j) {
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
-	SDL_Rect dstrect = { static_cast<int_least32_t>(winsizex / 2 - texW / 2),static_cast<int_least32_t>(winsizey / 2 + texH*1.5), texW, texH };
+	SDL_Rect dstrect = { static_cast<int_least32_t>(winsizex / 2 - texW / 2),static_cast<int_least32_t>(winsizey / 2 + texH * 1.5), texW, texH };
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);

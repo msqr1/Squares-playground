@@ -4,7 +4,6 @@
 #include "menu.h"
 #include <iostream>
 #undef main
-
 int_least32_t main() {
 	std::ios_base::sync_with_stdio(false);
 	//Init part
@@ -37,6 +36,7 @@ int_least32_t main() {
 	phost_b phs{};
 	//Networking
 	sockaddr_in dest{};
+	group_req grstruct{};
 	SOCKET tsock{};
 	Square tsqr{};
 	Sqrc squares{};
@@ -50,6 +50,9 @@ int_least32_t main() {
 		SDL_PollEvent(&ev);
 		switch (ev.type) {
 		case SDL_QUIT: {
+			lReq(dest, tsock, tsqr.index);
+			shutdown(tsock, SD_BOTH);
+			closesocket(tsock);
 			loop = false;
 		}
 		}
@@ -78,6 +81,7 @@ int_least32_t main() {
 				upr.draw_sqr(*i.second);
 			}
 			upr.handle_hostinfo(hif);
+			processMsg(tsock, squares, tsqr, dest);
 			SDL_RenderPresent(ren);
 			break;
 		}
@@ -88,13 +92,21 @@ int_least32_t main() {
 			break;
 		}
 		case PREHOST: { 
-			prepareRoom(dest, tsock, tsqr);
+			int res{ prepareRoom(dest, tsock, tsqr) };
+			if (res != 0) {
+				std::cout << "Error occurred, please try again\n";
+				gamestate = HOSTMENU;
+			};
 			hif.storage = std::to_string(dest.sin_port*3);
 			gamestate = GAMEPLAY;
 			break;
 		}
 		case PREJOIN: { 
-			joinRoom(dest, tsock, tsqr);
+			int res{ joinRoom(dest, tsock, tsqr) };
+			if (res != 0) {
+				std::cout << "Error occurred, please try again\n";
+				gamestate = JOINMENU;
+			};
 			iReq(dest, tsock, tsqr);
 			gamestate = GAMEPLAY;
 			break;
@@ -106,7 +118,6 @@ int_least32_t main() {
 		}
 		}
 	}
-	closesocket(tsock);
 	upr.closefont(tt.font)->closefont(tt.joinfont)->closefont(tt.hostfont)
 		->closefont(tmb.font)->closefont(hb.font)->closefont(jb.font)
 		->closefont(hif.font)->closefont(phs.font)->closefont(lct.font);

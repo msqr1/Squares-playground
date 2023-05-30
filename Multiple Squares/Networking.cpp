@@ -1,6 +1,5 @@
 #pragma once
 #include "Networking.h"
-
 unsigned long long rng(unsigned long long min, unsigned long long max) {
 	std::mt19937 generator((unsigned int)time(0));
 	std::uniform_real_distribution<long double> maprange(static_cast<long double>(min), static_cast<long double>(max));
@@ -8,6 +7,7 @@ unsigned long long rng(unsigned long long min, unsigned long long max) {
 }
 int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	sin.sin_family = AF_INET;
+	inet_pton(AF_INET, def_addr, &sin.sin_addr);
 	char hostname[256]{}; //Is actually DNS hostname, can't be playername because it has 255 characters limit
 	char playername[16]{}; //Is actually computername because it has 15 characters limit
 	DWORD playernamesize{ sizeof(playername) };
@@ -25,7 +25,6 @@ int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 		return WSAGetLastError();
 	}
 	in_addr SendInterface{ ((sockaddr_in*)result->ai_addr)->sin_addr };
-	sockaddr_in group{};
 	s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	group_req grstruct{};
 	grstruct.gr_group = *((sockaddr_storage*)&sin);
@@ -42,6 +41,7 @@ int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &yes, sizeof(yes)) != 0) {
 		return WSAGetLastError();
 	}
+	ioctlsocket(s, FIONBIO, (u_long*)&yes);
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
 		return WSAGetLastError();
 	}
@@ -92,6 +92,7 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &yes, sizeof(yes)) != 0) {
 		return WSAGetLastError();
 	}
+	ioctlsocket(s, FIONBIO, (u_long*)&yes);
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
 		return WSAGetLastError();
 	}
@@ -105,19 +106,26 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 }
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	msg tosend{ Info_Request(tsqr) };
-	return sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+	return WSAGetLastError();
 }
 int iRep(sockaddr_in& sin, SOCKET& s, Square& tsqr, uint_least8_t newindex) {
 	msg tosend{ Info_Reply(tsqr, newindex) };
-	return sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+	return WSAGetLastError();
+}
+int lReq(sockaddr_in& sin, SOCKET& s, uint_least8_t thisindex) {
+	msg tosend{ thisindex };
+	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+	return WSAGetLastError();
 }
 void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 	static std::set<uint_least8_t> indexset{};
-	static uint_least8_t store{ []() {for (uint_least8_t i {0}; i <= max_player; i++) {
+	static uint_least8_t store{ []() {for (uint_least8_t i {1}; i <= max_player; i++) {
 	indexset.insert(indexset.end(), i); }; return (unsigned char)0; }()};
 	char recvd[sizeof(msg)]{};
 	recvfrom(s, recvd, sizeof(msg), 0, 0, 0);
-	if (recvd != nullptr) {
+	if (WSAGetLastError() == 0 && recvd != nullptr) {
 		msg message{ *(msg*)recvd };
 		size_t type{ message.index() };
 		switch (type) {
@@ -126,6 +134,7 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 			std::cout << "Received position update from index: " << res.index << '\n';
 			(*c.at(res.index)).posx = res.x;
 			(*c.at(res.index)).posx = res.y;
+			break;
 		}
 		case 1: {
 			Info_Request res{ std::get<1>(message) };
@@ -142,7 +151,8 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 			Info_Reply res{ std::get<2>(message) };
 			std::cout << "Received iRep: \n";
 			std::cout << "Newindex: " << static_cast<int>(res.nIndex) << '\n';
-			c.try_emplace(res.tsqr.index, std::make_unique<Square>(tsqr));
+			std::cout << "Init pos: " << res.tsqr.posx << ',' << res.tsqr.posy << '\n';
+			c.try_emplace(res.tsqr.index, std::make_unique<Square>(res.tsqr));
 			if (res.nIndex != store) {
 				tsqr.index = res.nIndex;
 				indexset.erase(res.nIndex);
@@ -152,9 +162,10 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 		}
 		case 3: {
 			uint_least8_t res{ std::get<3>(message) };
-			std::cout << "Received leaving notification for index:  " << res << '\n';
+			std::cout << "Received leaving notification for index:  " << static_cast<int>(res) << '\n';
 			c.erase(res);
 			indexset.emplace(res);
+			std::cout << "Index " << static_cast<int>(res) << " is now available.\n";
 			break;
 		}
 		}
