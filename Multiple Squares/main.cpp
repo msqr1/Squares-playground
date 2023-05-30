@@ -107,6 +107,7 @@ int_least32_t main() {
 				gamestate = JOINMENU;
 			};
 			iReq(dest, tsock, tsqr);
+			hif.storage = std::to_string(dest.sin_port*3);
 			gamestate = GAMEPLAY;
 			break;
 		}
