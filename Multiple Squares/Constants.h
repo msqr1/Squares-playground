@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-constexpr double P_SPEED{ 100 }; //Speed in pixel per second
+constexpr double P_SPEED{ 200 }; //Speed in pixel per second
 constexpr int P_SIZE{ 50 }; //pixels
 const std::string checkarray{ "$BNTu2SnlF)jV_-mEP7=y+0W3bax@OMYAK?hU1L&4G^~JvqoZwgf{H!8z<`psDRIdk|CteX(#6ir>Q*59c};%" };
 const std::string padarray{ "\"\',./[]\\" };
