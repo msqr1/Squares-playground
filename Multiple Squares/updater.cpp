@@ -13,28 +13,24 @@ updater* updater::draw_sqr(Square& sqr) {
 	return this;
 }
 updater* updater::handle_input(Square& sqr, double fps) {
-	static bool w;
-	static bool s;
-	static bool a;
-	static bool d;
 	if (ev->type == SDL_KEYDOWN && ev->key.repeat == 0) {
 		switch (ev->key.keysym.scancode) {
-		case SDL_SCANCODE_W: w = true; break;
-		case SDL_SCANCODE_S: s = true; break;
-		case SDL_SCANCODE_A: a = true; break;
-		case SDL_SCANCODE_D: d = true; break;
+		case SDL_SCANCODE_W: sqr.controls[0] = 1; break;
+		case SDL_SCANCODE_A: sqr.controls[1] = 1; break;
+		case SDL_SCANCODE_S: sqr.controls[2] = 1; break;
+		case SDL_SCANCODE_D: sqr.controls[3] = 1; break;
 		}
 	}
 	if (ev->type == SDL_KEYUP) {
 		switch (ev->key.keysym.scancode) {
-		case SDL_SCANCODE_W: w = false; break;
-		case SDL_SCANCODE_S: s = false; break;
-		case SDL_SCANCODE_A: a = false; break;
-		case SDL_SCANCODE_D: d = false; break;
+		case SDL_SCANCODE_W: sqr.controls[0] = 0; break;
+		case SDL_SCANCODE_A: sqr.controls[1] = 0; break;
+		case SDL_SCANCODE_S: sqr.controls[2] = 0; break;
+		case SDL_SCANCODE_D: sqr.controls[3] = 0; break;
 		}
 	}
-	double xspeed{ P_SPEED / fps * (a ^ d ? a ? -1 : 1 : 0) };
-	double yspeed{ P_SPEED / fps * (w ^ s ? w ? -1 : 1 : 0) };
+	double xspeed{ P_SPEED / fps * (sqr.controls[1] ^ sqr.controls[3] ? sqr.controls[1] ? -1 : 1 : 0) };
+	double yspeed{ P_SPEED / fps * (sqr.controls[0] ^ sqr.controls[2] ? sqr.controls[0] ? -1 : 1 : 0) };
 	if (xspeed != 0 && yspeed != 0) {
 		xspeed *= .7071;
 		yspeed *= .7071;
