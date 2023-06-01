@@ -127,8 +127,7 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 	recvfrom(s, recvd, sizeof(msg), 0, 0, 0);
 	if (WSAGetLastError() == 0 && recvd != nullptr) {
 		msg message{ *(msg*)recvd };
-		size_t type{ message.index() };
-		switch (type) {
+		switch (message.index()) {
 		case 0: {
 			Position_Update res{ std::get<0>(message) };
 			std::cout << "Received position update from index: " << res.index << '\n';
