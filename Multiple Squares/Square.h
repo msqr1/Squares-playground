@@ -12,6 +12,5 @@ struct Square
 	uint_least8_t g{};
 	uint_least8_t b{};
 	uint_least8_t index{};
-	std::bitset<4> controls{};
 };
 typedef std::unordered_map <uint_least8_t, std::unique_ptr<Square>> Sqrc;
