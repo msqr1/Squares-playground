@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <bitset>
+#include <memory>
 struct Square
 {
 	Square(const char* name, uint_least8_t index, uint_least8_t r, uint_least8_t g, uint_least8_t b);
