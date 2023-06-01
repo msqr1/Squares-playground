@@ -41,7 +41,6 @@ int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &yes, sizeof(yes)) != 0) {
 		return WSAGetLastError();
 	}
-	ioctlsocket(s, FIONBIO, (u_long*)&yes);
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
 		return WSAGetLastError();
 	}
@@ -92,7 +91,6 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &yes, sizeof(yes)) != 0) {
 		return WSAGetLastError();
 	}
-	ioctlsocket(s, FIONBIO, (u_long*)&yes);
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
 		return WSAGetLastError();
 	}
@@ -121,8 +119,9 @@ int lReq(sockaddr_in& sin, SOCKET& s, uint_least8_t thisindex) {
 }
 void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 	static std::set<uint_least8_t> indexset{};
-	static uint_least8_t store{ []() {for (uint_least8_t i {1}; i <= max_player; i++) {
-	indexset.insert(indexset.end(), i); }; return (unsigned char)0; }()};
+	static uint_least8_t store{ []() {for (uint_least8_t i{ 1 }; i <= max_player; i++) {
+		indexset.insert(indexset.end(), i);
+	}; return (unsigned char)0; }()};
 	char recvd[sizeof(msg)]{};
 	recvfrom(s, recvd, sizeof(msg), 0, 0, 0);
 	if (WSAGetLastError() == 0 && recvd != nullptr) {
@@ -137,18 +136,20 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 		}
 		case 1: {
 			Info_Request res{ std::get<1>(message) };
-			std::cout << "Received iReq: \n";
-			std::cout << "RGB: " << static_cast<int>(res.r) << ',' << static_cast<int>(res.g) << ',' << static_cast<int>(res.b) << "\n";
-			std::cout << "Name: " << res.name << '\n';
-			uint_least8_t newindex{ *indexset.begin() };
-			c.try_emplace(newindex, std::make_unique<Square>(res.name, newindex, res.r, res.g, res.b));
-			iRep(sin, s, tsqr, newindex);
-			indexset.erase(newindex);
+			if (strcmp(res.name, tsqr.name) != 0) {
+				std::cout << "Received iReq: \n";
+				std::cout << "RGB: " << static_cast<int>(res.r) << ',' << static_cast<int>(res.g) << ',' << static_cast<int>(res.b) << "\n";
+				std::cout << "Name: " << res.name << '\n';
+				uint_least8_t newindex{ *indexset.begin() };
+				c.try_emplace(newindex, std::make_unique<Square>(res.name, newindex, res.r, res.g, res.b));
+				iRep(sin, s, tsqr, newindex);
+				indexset.erase(newindex);
+			}
 			break;
 		}
 		case 2: {
 			Info_Reply res{ std::get<2>(message) };
-			if(!c.contains(res.tsqr.index)) {
+			if (!c.contains(res.tsqr.index)) {
 				std::cout << "Received iRep: \n";
 				std::cout << "Newindex: " << static_cast<int>(res.nIndex) << '\n';
 				std::cout << "Init pos: " << res.tsqr.posx << ',' << res.tsqr.posy << '\n';
