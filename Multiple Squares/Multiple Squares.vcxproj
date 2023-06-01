@@ -180,7 +180,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <PreventDllBinding>true</PreventDllBinding>
       <SetChecksum>true</SetChecksum>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -228,6 +234,7 @@
       <UACUIAccess>false</UACUIAccess>
       <LargeAddressAware>true</LargeAddressAware>
       <EnableUAC>false</EnableUAC>
+      <EntryPointSymbol>"main"</EntryPointSymbol>
     </Link>
     <Manifest>
       <VerboseOutput>false</VerboseOutput>

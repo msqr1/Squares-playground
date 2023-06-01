@@ -1,5 +1,6 @@
 #pragma once
 #include "Square.h"
+#include <bitset>
 #include "Networking.h"
 #include "menu.h"
 class updater {

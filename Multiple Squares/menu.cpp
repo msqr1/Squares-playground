@@ -21,4 +21,3 @@ void field::handle_paste() {
 void field::cut_6() {
 	this->ttd = this->ttd.substr(0, 6);
 }
-
