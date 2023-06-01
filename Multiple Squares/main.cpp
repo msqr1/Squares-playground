@@ -4,6 +4,7 @@
 #include "menu.h"
 #include <iostream>
 #undef main
+
 int_least32_t main() {
 	std::ios_base::sync_with_stdio(false);
 	//Init part
@@ -17,7 +18,7 @@ int_least32_t main() {
 	int_least32_t width{ static_cast<int_least32_t> (dm.w / 2) };
 	int_least32_t height{ static_cast<int_least32_t>(dm.h / 2) };
 	SDL_Window* win{ SDL_CreateWindow("Single/Multiple square(s)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED) };
-	SDL_Renderer* ren {SDL_CreateRenderer(win, -1,  SDL_RENDERER_ACCELERATED)};
+	SDL_Renderer* ren{ SDL_CreateRenderer(win, -1,  SDL_RENDERER_ACCELERATED) };
 	//Event List
 	SDL_Event ev{};
 	//Main loop & events
@@ -37,6 +38,9 @@ int_least32_t main() {
 	//Networking
 	sockaddr_in dest{};
 	SOCKET tsock{};
+	pollfd set{};
+	set.fd = tsock;
+	set.events = POLLRDNORM | POLLWRNORM;
 	Square tsqr{};
 	Sqrc squares{};
 	squares.reserve(10);
@@ -57,22 +61,25 @@ int_least32_t main() {
 		}
 		//gamestate
 		switch (gamestate) {
-		case MAINMENU: { 
+		case MAINMENU: {
 			SDL_SetRenderDrawColor(ren, 255, 255, 255, 0);
 			SDL_RenderClear(ren);
 			upr.draw_titles(tt)->handle_host_b(hb)->handle_join_b(jb);
 			SDL_RenderPresent(ren);
 			break;
-		} 
-		case JOINMENU: {  
+		}
+		case JOINMENU: {
 			SDL_SetRenderDrawColor(ren, 255, 255, 255, 0);
 			SDL_RenderClear(ren);
 			upr.draw_titles(tt)->handle_tomenu_b(tmb)->handle_field(cfd, dest)->draw_enter2join(e2j);
 			SDL_RenderPresent(ren);
 			break;
 		}
-		case GAMEPLAY: { 
+		case GAMEPLAY: {
 			SDL_RenderClear(ren);
+			if (WSAPoll(&set, 1, 0) > 1 && set.revents == (POLLRDNORM | POLLWRNORM)) {
+				processMsg(tsock, squares, tsqr, dest);
+			}
 			//Handle this square
 			upr.handle_input(tsqr, fps)->handle_border_collision(tsqr)->draw_sqr(tsqr);
 			//Other player square handle
@@ -80,39 +87,39 @@ int_least32_t main() {
 				upr.draw_sqr(*i.second);
 			}
 			upr.handle_hostinfo(hif);
-			processMsg(tsock, squares, tsqr, dest);
 			SDL_RenderPresent(ren);
 			break;
 		}
-		case HOSTMENU: { 
+		case HOSTMENU: {
 			SDL_RenderClear(ren);
 			upr.handle_lchost_b(lct)->handle_tomenu_b(tmb)->handle_phost_b(phs)->draw_titles(tt);
 			SDL_RenderPresent(ren);
 			break;
 		}
-		case PREHOST: { 
+		case PREHOST: {
 			int res{ prepareRoom(dest, tsock, tsqr) };
 			if (res != 0) {
 				std::cout << "Error occurred, please try again\n";
 				gamestate = HOSTMENU;
 			};
-			hif.storage = std::to_string(dest.sin_port*3);
+			hif.storage = std::to_string(dest.sin_port * 3);
 			gamestate = GAMEPLAY;
 			break;
 		}
-		case PREJOIN: { 
+		case PREJOIN: {
 			int res{ joinRoom(dest, tsock, tsqr) };
 			if (res != 0) {
 				std::cout << "Error occurred, please try again\n";
 				gamestate = JOINMENU;
 			};
 			iReq(dest, tsock, tsqr);
-			hif.storage = std::to_string(dest.sin_port*3);
+
+			hif.storage = std::to_string(dest.sin_port * 3);
 			gamestate = GAMEPLAY;
 			break;
 		}
 		default: {
-			std::cout <<  "Error: No such gamestate";
+			std::cout << "Error: No such gamestate";
 			loop = false;
 			break;
 		}
