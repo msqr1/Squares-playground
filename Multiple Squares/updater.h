@@ -11,8 +11,8 @@ public:
 	updater* draw_sqr(Square& sqr);
 	updater* draw_titles(title& title);
 	updater* handle_host_b(host_b& host);
-	updater* handle_join_b(join_b& join);
-	updater* handle_tomenu_b(tomenu_b& gsw);
+	updater* handle_join_b(join_b& join, authorize& auth, field& cfd);
+	updater* handle_tomenu_b(tomenu_b&);
 	updater* handle_lchost_b(lchost_b& lct);
 	updater* handle_phost_b(phost_b& shs);
 	updater* handle_hostinfo(hostinfo& hif);

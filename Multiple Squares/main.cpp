@@ -69,7 +69,7 @@ int_least32_t main() {
 		SDL_RenderClear(ren);
 		switch (gamestate) {
 		case MAINMENU: {
-			upr.draw_titles(tt)->handle_host_b(hb)->handle_join_b(jb);		
+			upr.draw_titles(tt)->handle_host_b(hb)->handle_join_b(jb, auth, cfd);		
 			break;
 		}
 		case JOINMENU: {

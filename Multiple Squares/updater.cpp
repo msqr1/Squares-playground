@@ -108,7 +108,7 @@ updater* updater::handle_host_b(host_b& host) {
 	SDL_DestroyTexture(texture);
 	return this;
 }
-updater* updater::handle_join_b(join_b& join) {
+updater* updater::handle_join_b(join_b& join, authorize& auth, field& cfd) {
 	SDL_Surface* surface{ TTF_RenderUTF8_Shaded(join.font, join.ttd, join.color, join.boxcolor) };
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
@@ -122,6 +122,8 @@ updater* updater::handle_join_b(join_b& join) {
 		if (x > static_cast<int_least32_t>(winsizex / 2 - texW / 2) && x < static_cast<int_least32_t>(winsizex / 2 - texW / 2) + texW) {
 			join.color = join.selectcolor;
 			if ((buttons & SDL_BUTTON_LMASK) != 0) {
+				auth.dflag = 0;
+				cfd.ttd.clear();
 				*this->gamestate = JOINMENU;
 			}
 		}
