@@ -35,6 +35,8 @@ int_least32_t main() {
 	enter2join e2j{};
 	lchost_b lct{};
 	phost_b phs{};
+	authorize auth{};
+	auth.dflag = 0;
 	//Networking
 	sockaddr_in dest{};
 	SOCKET tsock{};
@@ -48,7 +50,7 @@ int_least32_t main() {
 	while (loop) {
 		deltat = (SDL_GetPerformanceCounter() - p1 + 0.0) / SDL_GetPerformanceFrequency();
 		p1 = SDL_GetPerformanceCounter();
-		if (gamestate != GAMEPLAY || SDL_GetWindowFlags(win) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) {
+		if (gamestate != GAMEPLAY && gamestate != PREJOIN || SDL_GetWindowFlags(win) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) {
 			SDL_WaitEvent(&ev);
 		}
 		else {
@@ -63,25 +65,20 @@ int_least32_t main() {
 		}
 		}
 		//gamestate
+		SDL_SetRenderDrawColor(ren, 255, 255, 255, 0);
+		SDL_RenderClear(ren);
 		switch (gamestate) {
 		case MAINMENU: {
-			SDL_SetRenderDrawColor(ren, 255, 255, 255, 0);
-			SDL_RenderClear(ren);
-			upr.draw_titles(tt)->handle_host_b(hb)->handle_join_b(jb);
-			SDL_RenderPresent(ren);
+			upr.draw_titles(tt)->handle_host_b(hb)->handle_join_b(jb);		
 			break;
 		}
 		case JOINMENU: {
-			SDL_SetRenderDrawColor(ren, 255, 255, 255, 0);
-			SDL_RenderClear(ren);
-			upr.draw_titles(tt)->handle_tomenu_b(tmb)->handle_field(cfd, dest)->draw_enter2join(e2j);
-			SDL_RenderPresent(ren);
+			upr.draw_titles(tt)->handle_tomenu_b(tmb)->handle_field(cfd, dest)
+				->draw_enter2join(e2j)->draw_authorize(auth);
 			break;
 		}
 		case GAMEPLAY: {
-			SDL_RenderClear(ren);
 			if (WSAPoll(&set, 1, 0) == 1 && (set.revents == (POLLRDNORM | POLLWRNORM))) {
-				std::cout << "Readable and writable\n";
 				processMsg(tsock, squares, tsqr, dest);
 			}
 			//Handle this square
@@ -91,13 +88,10 @@ int_least32_t main() {
 				upr.draw_sqr(*i.second);
 			}
 			upr.handle_hostinfo(hif);
-			SDL_RenderPresent(ren);
 			break;
 		}
 		case HOSTMENU: {
-			SDL_RenderClear(ren);
 			upr.handle_lchost_b(lct)->handle_tomenu_b(tmb)->handle_phost_b(phs)->draw_titles(tt);
-			SDL_RenderPresent(ren);
 			break;
 		}
 		case PREHOST: {
@@ -115,14 +109,20 @@ int_least32_t main() {
 		case PREJOIN: {
 			int res{ joinRoom(dest, tsock, tsqr) };
 			if (res != 0) {
-				std::cout << "Error occurred, please try again\n";
+				auth.dflag = 1;
 				gamestate = JOINMENU;
 			};
 			iReq(dest, tsock, tsqr);
-			hif.storage = std::to_string(dest.sin_port * 3);
 			set.fd = tsock;
 			set.events = POLLRDNORM | POLLWRNORM;
-			gamestate = GAMEPLAY;
+			if (WSAPoll(&set, 1, 2000) == 1 && set.revents == (POLLRDNORM | POLLWRNORM)) {
+				hif.storage = std::to_string(dest.sin_port * 3);
+				gamestate = GAMEPLAY;
+			}
+			else {
+				auth.dflag = 1;
+				gamestate = JOINMENU;
+			}
 			break;
 		}
 		default: {
@@ -131,6 +131,7 @@ int_least32_t main() {
 			break;
 		}
 		}
+		SDL_RenderPresent(ren);
 	}
 	upr.closefont(tt.font)->closefont(tt.joinfont)->closefont(tt.hostfont)
 		->closefont(tmb.font)->closefont(hb.font)->closefont(jb.font)

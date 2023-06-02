@@ -43,16 +43,16 @@ updater* updater::handle_input(Square& sqr, double fps) {
 	return this;
 }
 updater* updater::handle_border_collision(Square& sqr) {
-	if (sqr.posx <= 0) {
+	if (sqr.posx < 0) {
 		sqr.posx = 0;
 	}
-	if (sqr.posy <= 0) {
+	if (sqr.posy < 0) {
 		sqr.posy = 0;
 	}
-	if (sqr.posx + P_SIZE >= this->winsizex) {
+	if (sqr.posx + P_SIZE > this->winsizex) {
 		sqr.posx = this->winsizex - P_SIZE;
 	}
-	if (sqr.posy + P_SIZE >= this->winsizey) {
+	if (sqr.posy + P_SIZE > this->winsizey) {
 		sqr.posy = this->winsizey - P_SIZE;
 	}
 	return this;
@@ -68,6 +68,7 @@ updater* updater::draw_titles(title& title) {
 		break;
 	case 3:
 		surface = TTF_RenderUTF8_Blended(title.hostfont, title.hostttd, title.color);
+		break;
 	}
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
@@ -221,7 +222,11 @@ updater* updater::handle_hostinfo(hostinfo& hif) {
 		&& (x > static_cast<int_least32_t>(winsizex - texW) && x < this->winsizex)) {
 		hif.ttd = "   Copy!   ";
 		if ((buttons & SDL_BUTTON_LMASK) != 0) {
-			hif.cpy2clip();
+			char* text{ SDL_GetClipboardText() };
+			if (text != hif.storage) {
+				SDL_SetClipboardText(hif.storage.c_str());
+			}
+			SDL_free(text);
 		}
 	}
 	else { hif.ttd = hif.storage; }
@@ -240,20 +245,30 @@ updater* updater::handle_field(field& cfd, sockaddr_in& dest) {
 	case SDL_KEYDOWN:
 		switch (this->ev->key.keysym.scancode) {
 		case SDL_SCANCODE_BACKSPACE:
-			cfd.handle_del();
+			if (!cfd.ttd.empty()) {
+				cfd.ttd.pop_back();
+			}
 			break;
 		case SDL_SCANCODE_V:
 			if (SDL_GetModState() & KMOD_CTRL) {
-				cfd.handle_paste();
+				char* text{ SDL_GetClipboardText() };
+				if (SDL_HasClipboardText()) {
+					cfd.ttd += SDL_GetClipboardText();
+					cfd.ttd = cfd.ttd.substr(0, 6);
+				}
+				SDL_free(text);
 			}
 			break;
 		case SDL_SCANCODE_RETURN:
 		case SDL_SCANCODE_KP_ENTER:
-			dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd) / 3);
-			*this->gamestate = PREJOIN;
+			if (!cfd.ttd.empty()) {
+				dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd) / 3);
+				*this->gamestate = PREJOIN;
+			}
 			break;
 		}
 	}
+	std::erase_if(cfd.ttd, [](char a) -> bool {return !isdigit(a); });
 	SDL_Surface* surface{ TTF_RenderUTF8_Blended(cfd.font,cfd.ttd.c_str(),cfd.textcolor) };
 	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
 	int_least32_t texW{}, texH{};
@@ -281,6 +296,21 @@ updater* updater::draw_enter2join(enter2join& e2j) {
 	int_least32_t texW{}, texH{};
 	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 	SDL_Rect dstrect = { static_cast<int_least32_t>(winsizex / 2 - texW / 2),static_cast<int_least32_t>(winsizey / 2 + texH * 1.5), texW, texH };
+	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(texture);
+	return this;
+}
+updater* updater::draw_authorize(authorize& auth) {
+	SDL_Surface* surface{};
+	if (auth.dflag == 1) {
+		surface = TTF_RenderUTF8_Blended(auth.font, auth.ttd, auth.color) ;
+	}
+	else { return this; }
+	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
+	int_least32_t texW{}, texH{};
+	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
+	SDL_Rect dstrect = { static_cast<int_least32_t>(winsizex / 2 - texW / 2),static_cast<int_least32_t>(winsizey / 1.7 - texH / 2), texW, texH };
 	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);

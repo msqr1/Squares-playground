@@ -243,7 +243,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="menu.cpp" />
     <ClCompile Include="Networking.cpp" />
     <ClCompile Include="Square.cpp" />
     <ClCompile Include="updater.cpp" />

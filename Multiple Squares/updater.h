@@ -18,6 +18,7 @@ public:
 	updater* handle_hostinfo(hostinfo& hif);
 	updater* handle_field(field& cfd, sockaddr_in& dest);
 	updater* draw_enter2join(enter2join& e2j);
+	updater* draw_authorize(authorize& auth);
 	updater* closefont(TTF_Font* font);
 private:
 	SDL_Window* win{};
