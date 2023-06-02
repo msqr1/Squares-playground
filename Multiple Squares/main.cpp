@@ -46,7 +46,7 @@ int_least32_t main() {
 	SOCKET tsock{};
 	pollfd set{};
 	//Timer for movement and other variables
-	bool condition{};
+	bool condition{ true };
 	std::chrono::steady_clock::time_point later {};
 	double deltat{};
 	uint_least64_t p1{};
