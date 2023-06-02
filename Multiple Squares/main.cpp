@@ -39,18 +39,21 @@ int_least32_t main() {
 	sockaddr_in dest{};
 	SOCKET tsock{};
 	pollfd set{};
-	set.fd = tsock;
-	set.events = POLLRDNORM | POLLWRNORM;
 	Square tsqr{};
 	Sqrc squares{};
 	squares.reserve(10);
 	//Time based movement & FPS limiter
-	double fps{};
+	double deltat{};
 	uint_least64_t p1{};
 	while (loop) {
-		fps = 1 / ((SDL_GetPerformanceCounter() - p1 + 0.0) / SDL_GetPerformanceFrequency());
+		deltat = (SDL_GetPerformanceCounter() - p1 + 0.0) / SDL_GetPerformanceFrequency();
 		p1 = SDL_GetPerformanceCounter();
-		SDL_PollEvent(&ev);
+		if (gamestate != GAMEPLAY || SDL_GetWindowFlags(win) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) {
+			SDL_WaitEvent(&ev);
+		}
+		else {
+			SDL_PollEvent(&ev);
+		}
 		switch (ev.type) {
 		case SDL_QUIT: {
 			lReq(dest, tsock, tsqr.index);
@@ -77,11 +80,12 @@ int_least32_t main() {
 		}
 		case GAMEPLAY: {
 			SDL_RenderClear(ren);
-			if (WSAPoll(&set, 1, 0) > 1 && set.revents == (POLLRDNORM | POLLWRNORM)) {
+			if (WSAPoll(&set, 1, 0) == 1 && (set.revents == (POLLRDNORM | POLLWRNORM))) {
+				std::cout << "Readable and writable\n";
 				processMsg(tsock, squares, tsqr, dest);
 			}
 			//Handle this square
-			upr.handle_input(tsqr, fps)->handle_border_collision(tsqr)->draw_sqr(tsqr);
+			upr.handle_input(tsqr, 1/deltat)->handle_border_collision(tsqr)->draw_sqr(tsqr);
 			//Other player square handle
 			for (auto& i : squares) {
 				upr.draw_sqr(*i.second);
@@ -103,6 +107,8 @@ int_least32_t main() {
 				gamestate = HOSTMENU;
 			};
 			hif.storage = std::to_string(dest.sin_port * 3);
+			set.fd = tsock;
+			set.events = POLLRDNORM | POLLWRNORM;
 			gamestate = GAMEPLAY;
 			break;
 		}
@@ -113,8 +119,9 @@ int_least32_t main() {
 				gamestate = JOINMENU;
 			};
 			iReq(dest, tsock, tsqr);
-
 			hif.storage = std::to_string(dest.sin_port * 3);
+			set.fd = tsock;
+			set.events = POLLRDNORM | POLLWRNORM;
 			gamestate = GAMEPLAY;
 			break;
 		}

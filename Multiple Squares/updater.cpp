@@ -5,7 +5,9 @@ updater::updater(SDL_Window* win, SDL_Renderer* ren, uint_least8_t* gamestate, S
 	SDL_GetWindowSize(win, &this->winsizex, &this->winsizey);
 }
 updater* updater::draw_sqr(Square& sqr) {
-	SDL_Rect todraw{ std::lroundl(sqr.posx), std::lround(sqr.posy), P_SIZE, P_SIZE };
+	static SDL_Rect todraw{ 0, 0, P_SIZE, P_SIZE };
+	todraw.x = std::lround(sqr.posx);
+	todraw.y = std::lround(sqr.posy);
 	SDL_SetRenderDrawColor(this->ren, sqr.r, sqr.g, sqr.b, 0);
 	SDL_RenderDrawRect(this->ren, &todraw);
 	SDL_RenderFillRect(this->ren, &todraw);

@@ -234,7 +234,8 @@
       <UACUIAccess>false</UACUIAccess>
       <LargeAddressAware>true</LargeAddressAware>
       <EnableUAC>false</EnableUAC>
-      <EntryPointSymbol>"main"</EntryPointSymbol>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
     <Manifest>
       <VerboseOutput>false</VerboseOutput>
