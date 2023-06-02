@@ -2,6 +2,7 @@
 #include "Square.h"
 #include "updater.h"
 #include "menu.h"
+#include <chrono>
 #include <iostream>
 #undef main
 
@@ -37,25 +38,37 @@ int_least32_t main() {
 	phost_b phs{};
 	authorize auth{};
 	auth.dflag = 0;
+	Square tsqr{};
+	Sqrc squares{};
+	squares.reserve(max_player);
 	//Networking
 	sockaddr_in dest{};
 	SOCKET tsock{};
 	pollfd set{};
-	Square tsqr{};
-	Sqrc squares{};
-	squares.reserve(10);
-	//Time based movement & FPS limiter
+	//Timer for movement and other variables
+	bool condition{};
+	std::chrono::steady_clock::time_point later {};
 	double deltat{};
 	uint_least64_t p1{};
 	while (loop) {
 		deltat = (SDL_GetPerformanceCounter() - p1 + 0.0) / SDL_GetPerformanceFrequency();
 		p1 = SDL_GetPerformanceCounter();
-		if (gamestate != GAMEPLAY && gamestate != PREJOIN || SDL_GetWindowFlags(win) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) {
+		//performance control
+		switch (gamestate) {
+		case GAMEPLAY:
+			SDL_PollEvent(&ev);
+			break;
+		case PREJOIN:
+		case JOINMENU:
+			SDL_WaitEventTimeout(&ev, 100);
+			break;
+		default:
 			SDL_WaitEvent(&ev);
 		}
-		else {
-			SDL_PollEvent(&ev);
+		if (SDL_GetWindowFlags(win) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) {
+			SDL_WaitEvent(&ev);
 		}
+		//main event handler
 		switch (ev.type) {
 		case SDL_QUIT: {
 			lReq(dest, tsock, tsqr.index);
@@ -73,6 +86,17 @@ int_least32_t main() {
 			break;
 		}
 		case JOINMENU: {
+			[&](){if (auth.dflag == 1) {
+				if (condition) {
+					later = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
+					condition = false;
+				}
+				if (std::chrono::steady_clock::now() >= later) {
+					auth.dflag = 0;
+					condition = true;
+					return;
+				}
+			}}();
 			upr.draw_titles(tt)->handle_tomenu_b(tmb)->handle_field(cfd, dest)
 				->draw_enter2join(e2j)->draw_authorize(auth);
 			break;
@@ -99,6 +123,7 @@ int_least32_t main() {
 			if (res != 0) {
 				std::cout << "Error occurred, please try again\n";
 				gamestate = HOSTMENU;
+				break;
 			};
 			hif.storage = std::to_string(dest.sin_port * 3);
 			set.fd = tsock;
@@ -111,12 +136,12 @@ int_least32_t main() {
 			if (res != 0) {
 				auth.dflag = 1;
 				gamestate = JOINMENU;
+				break;
 			};
 			iReq(dest, tsock, tsqr);
-			set.fd = tsock;
-			set.events = POLLRDNORM | POLLWRNORM;
-			if (WSAPoll(&set, 1, 2000) == 1 && set.revents == (POLLRDNORM | POLLWRNORM)) {
-				hif.storage = std::to_string(dest.sin_port * 3);
+			if (processMsg(tsock, squares, tsqr, dest) == 0) {
+				set.fd = tsock;
+				set.events = POLLRDNORM | POLLWRNORM;
 				gamestate = GAMEPLAY;
 			}
 			else {

@@ -38,7 +38,8 @@ int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, IPPROTO_IP, MCAST_JOIN_GROUP, (char*)&grstruct, sizeof(grstruct)) != 0) {
 		return WSAGetLastError();
 	}
-	if (setsockopt(s, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &yes, sizeof(yes)) != 0) {
+	DWORD timeo{ 2000 };
+	if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeo, sizeof(timeo)) != 0) {
 		return WSAGetLastError();
 	}
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
@@ -88,7 +89,8 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, IPPROTO_IP, MCAST_JOIN_GROUP, (char*)&grstruct, sizeof(grstruct)) != 0) {
 		return WSAGetLastError();
 	}
-	if (setsockopt(s, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &yes, sizeof(yes)) != 0) {
+	DWORD timeo{ 2000 };
+	if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeo, sizeof(timeo)) != 0) {
 		return WSAGetLastError();
 	}
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
@@ -117,7 +119,7 @@ int lReq(sockaddr_in& sin, SOCKET& s, uint_least8_t thisindex) {
 	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
 	return WSAGetLastError();
 }
-void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
+int processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 	static std::set<uint_least8_t> indexset{};
 	static uint_least8_t store{ []() {for (uint_least8_t i{ 1 }; i <= max_player; i++) {
 		indexset.insert(indexset.end(), i);
@@ -171,5 +173,7 @@ void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 			break;
 		}
 		}
+		return 0;
 	}
+	return WSAGetLastError();
 }

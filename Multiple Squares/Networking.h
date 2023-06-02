@@ -41,4 +41,4 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr);
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr);
 int iRep(sockaddr_in& sin, SOCKET& s, Square& tsqr, uint_least8_t newindex);
 int lReq(sockaddr_in& sin, SOCKET& s, uint_least8_t thisindex);
-void processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin);
+int processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin);
