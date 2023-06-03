@@ -74,16 +74,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\include;C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2-2.26.5\include</IncludePath>
-    <LibraryPath>C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\lib\x64;C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2-2.26.5\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\include;C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2-2.26.5\include</IncludePath>
+    <LibraryPath>C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\lib\x64;C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2-2.26.5\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
     <PublicModuleDirectories>$(PublicModuleDirectories)</PublicModuleDirectories>
     <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\include;C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2-2.26.5\include</IncludePath>
+    <IncludePath>C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\include;C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2-2.26.5\include</IncludePath>
     <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\lib\x64;C:\Users\rylex\source\SDL2 and SDL2ttf\SDL2-2.26.5\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2_ttf-2.20.2\lib\x64;C:\Users\plhon\source\SDL2 and SDL2ttf\SDL2-2.26.5\lib\x64;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
     <PublicModuleDirectories>$(PublicModuleDirectories)</PublicModuleDirectories>
   </PropertyGroup>
