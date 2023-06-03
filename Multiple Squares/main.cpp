@@ -123,11 +123,13 @@ int_least32_t main() {
 		case PREHOST: {
 			int res{ prepareRoom(dest, tsock, tsqr) };
 			if (res != 0) {
-				std::cout << "Error occurred, please try again\n";
+				std::cout << res;
+				closesocket(tsock);
 				gamestate = HOSTMENU;
 				break;
 			};
 			hif.storage = std::to_string(dest.sin_port * 3);
+			std::cout << "Real hosted port: " << ntohs(dest.sin_port);
 			set.fd = tsock;
 			set.events = POLLRDNORM | POLLWRNORM;
 			gamestate = GAMEPLAY;
@@ -136,7 +138,9 @@ int_least32_t main() {
 		case PREJOIN: {
 			int res{ joinRoom(dest, tsock, tsqr) };
 			if (res != 0) {
+				closesocket(tsock);
 				auth.dflag = 1;
+				std::cout << res;
 				gamestate = JOINMENU;
 				break;
 			};
@@ -145,9 +149,11 @@ int_least32_t main() {
 				set.fd = tsock;
 				set.events = POLLRDNORM | POLLWRNORM;
 				hif.storage = std::to_string(dest.sin_port * 3);
+				std::cout << "Real joined port: " << ntohs(dest.sin_port) << '\n';
 				gamestate = GAMEPLAY;
 			}
 			else {
+				closesocket(tsock);
 				auth.dflag = 1;
 				gamestate = JOINMENU;
 			}
