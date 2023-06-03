@@ -142,6 +142,7 @@ int_least32_t main() {
 			if (processMsg(tsock, squares, tsqr, dest) == 0) {
 				set.fd = tsock;
 				set.events = POLLRDNORM | POLLWRNORM;
+				hif.storage = std::to_string(dest.sin_port * 3);
 				gamestate = GAMEPLAY;
 			}
 			else {
