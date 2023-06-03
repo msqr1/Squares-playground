@@ -4,10 +4,26 @@ updater::updater(SDL_Window* win, SDL_Renderer* ren, uint_least8_t* gamestate, S
 	: win(win), ren(ren), gamestate(gamestate), ev(ev) {
 	SDL_GetWindowSize(win, &this->winsizex, &this->winsizey);
 }
-updater* updater::draw_sqr(Square& sqr) {
+updater* updater::draw_sqr(Square& sqr, TTF_Font* namefont, uint_least8_t tsqrindex) {
 	static SDL_Rect todraw{ 0, 0, P_SIZE, P_SIZE };
+	static SDL_Color namecolor {0, 0, 0};
+	SDL_Surface* surface{};
+	if (sqr.index == tsqrindex) {
+		surface =  TTF_RenderUTF8_Blended(namefont, std::string(std::string(sqr.name) + " (you)").c_str(), namecolor);
+	}
+	else {
+		surface = TTF_RenderUTF8_Blended(namefont, sqr.name, namecolor) ;
+	}
+	
+	SDL_Texture* texture{ SDL_CreateTextureFromSurface(this->ren,surface) };
+	int_least32_t texW{}, texH{};
+	SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 	todraw.x = std::lround(sqr.posx);
 	todraw.y = std::lround(sqr.posy);
+	SDL_Rect dstrect{ todraw.x - (texW - P_SIZE)/2, todraw.y + P_SIZE + 5, texW, texH};
+	SDL_RenderCopy(this->ren, texture, nullptr, &dstrect);
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(texture);
 	SDL_SetRenderDrawColor(this->ren, sqr.r, sqr.g, sqr.b, 0);
 	SDL_RenderDrawRect(this->ren, &todraw);
 	SDL_RenderFillRect(this->ren, &todraw);
@@ -237,7 +253,7 @@ updater* updater::handle_hostinfo(hostinfo& hif) {
 	SDL_DestroyTexture(texture);
 	return this;
 }
-updater* updater::handle_field(field& cfd, sockaddr_in& dest) {
+updater* updater::handle_field(field& cfd, sockaddr_in& dest, authorize& auth) {
 	SDL_StartTextInput();
 	SDL_PumpEvents();
 	switch (this->ev->type) {
@@ -255,17 +271,25 @@ updater* updater::handle_field(field& cfd, sockaddr_in& dest) {
 			if (SDL_GetModState() & KMOD_CTRL) {
 				char* text{ SDL_GetClipboardText() };
 				if (SDL_HasClipboardText()) {
-					cfd.ttd += SDL_GetClipboardText();
-					cfd.ttd = cfd.ttd.substr(0, 6);
+					std::string temp {SDL_GetClipboardText()};
+					std::erase_if(temp, [](char a) -> bool {return !isdigit(a); });
+					temp = temp.substr(0, 6 - cfd.ttd.size());
+					cfd.ttd += temp;
 				}
 				SDL_free(text);
+
 			}
 			break;
 		case SDL_SCANCODE_RETURN:
 		case SDL_SCANCODE_KP_ENTER:
 			if (!cfd.ttd.empty()) {
-				dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd) / 3);
-				*this->gamestate = PREJOIN;
+				if(std::stoi(cfd.ttd) % 3 == 0){
+					dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd) / 3);
+					*this->gamestate = PREJOIN;
+				}
+				else {
+					auth.dflag = 1;
+				}
 			}
 			break;
 		}

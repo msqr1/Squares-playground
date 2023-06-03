@@ -39,6 +39,7 @@ int_least32_t main() {
 	authorize auth{};
 	auth.dflag = 0;
 	Square tsqr{};
+	TTF_Font* namefont{ TTF_OpenFont("times.ttf", 20) };
 	Sqrc squares{};
 	squares.reserve(max_player);
 	//Networking
@@ -60,10 +61,11 @@ int_least32_t main() {
 			break;
 		case PREJOIN:
 		case JOINMENU:
-			SDL_WaitEventTimeout(&ev, 100);
+			SDL_WaitEventTimeout(&ev, 50);
 			break;
 		default:
 			SDL_WaitEvent(&ev);
+			break;
 		}
 		if (SDL_GetWindowFlags(win) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN)) {
 			SDL_WaitEvent(&ev);
@@ -97,7 +99,7 @@ int_least32_t main() {
 					return;
 				}
 			}}();
-			upr.draw_titles(tt)->handle_tomenu_b(tmb)->handle_field(cfd, dest)
+			upr.draw_titles(tt)->handle_tomenu_b(tmb)->handle_field(cfd, dest, auth)
 				->draw_enter2join(e2j)->draw_authorize(auth);
 			break;
 		}
@@ -106,10 +108,10 @@ int_least32_t main() {
 				processMsg(tsock, squares, tsqr, dest);
 			}
 			//Handle this square
-			upr.handle_input(tsqr, 1/deltat)->handle_border_collision(tsqr)->draw_sqr(tsqr);
+			upr.handle_input(tsqr, 1/deltat)->handle_border_collision(tsqr)->draw_sqr(tsqr, namefont, tsqr.index);
 			//Other player square handle
 			for (auto& i : squares) {
-				upr.draw_sqr(*i.second);
+				upr.draw_sqr(*i.second, namefont, tsqr.index);
 			}
 			upr.handle_hostinfo(hif);
 			break;

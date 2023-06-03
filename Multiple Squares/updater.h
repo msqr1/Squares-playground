@@ -8,7 +8,7 @@ public:
 	updater(SDL_Window* win, SDL_Renderer* ren, uint_least8_t* gamestate, SDL_Event* ev);
 	updater* handle_input(Square& sqr, double fps);
 	updater* handle_border_collision(Square& sqr);
-	updater* draw_sqr(Square& sqr);
+	updater* draw_sqr(Square& sqr, TTF_Font* namefont, uint_least8_t tsqrindex);
 	updater* draw_titles(title& title);
 	updater* handle_host_b(host_b& host);
 	updater* handle_join_b(join_b& join, authorize& auth, field& cfd);
@@ -16,7 +16,7 @@ public:
 	updater* handle_lchost_b(lchost_b& lct);
 	updater* handle_phost_b(phost_b& shs);
 	updater* handle_hostinfo(hostinfo& hif);
-	updater* handle_field(field& cfd, sockaddr_in& dest);
+	updater* handle_field(field& cfd, sockaddr_in& dest, authorize& auth);
 	updater* draw_enter2join(enter2join& e2j);
 	updater* draw_authorize(authorize& auth);
 	updater* closefont(TTF_Font* font);
