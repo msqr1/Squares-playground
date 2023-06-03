@@ -282,7 +282,7 @@ updater* updater::handle_field(field& cfd, sockaddr_in& dest, authorize& auth) {
 			break;
 		case SDL_SCANCODE_RETURN:
 		case SDL_SCANCODE_KP_ENTER:
-			if (!cfd.ttd.empty()) {
+			if (!cfd.ttd.empty() && std::stoi(cfd.ttd) != 0) {
 				if(std::stoi(cfd.ttd) % 3 == 0){
 					dest.sin_port = static_cast<USHORT>(std::stoi(cfd.ttd) / 3);
 					*this->gamestate = PREJOIN;
