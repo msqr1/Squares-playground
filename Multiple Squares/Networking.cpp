@@ -104,6 +104,12 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	freeaddrinfo(result);
 	return 0;
 }
+int pUpdate(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
+	Position_Update pos{ tsqr };
+	msg tosend{ pos };
+	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+	return WSAGetLastError();
+}
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	msg tosend{ Info_Request(tsqr) };
 	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
@@ -131,9 +137,9 @@ int processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 		switch (message.index()) {
 		case 0: {
 			Position_Update res{ std::get<0>(message) };
-			std::cout << "Received position update from index: " << res.index << '\n';
+			std::cout << "Received position update from index: " << static_cast<int>(res.index) << '\n';
 			(*c.at(res.index)).posx = res.x;
-			(*c.at(res.index)).posx = res.y;
+			(*c.at(res.index)).posy = res.y;
 			break;
 		}
 		case 1: {

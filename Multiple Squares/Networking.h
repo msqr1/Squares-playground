@@ -38,6 +38,7 @@ typedef std::variant<Position_Update, Info_Request, Info_Reply, uint_least8_t> m
 unsigned long long rng(unsigned long long min, unsigned long long max);
 int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr);
 int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr);
+int pUpdate(sockaddr_in& sin, SOCKET& s, Square& tsqr);
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr);
 int iRep(sockaddr_in& sin, SOCKET& s, Square& tsqr, uint_least8_t newindex);
 int lReq(sockaddr_in& sin, SOCKET& s, uint_least8_t thisindex);

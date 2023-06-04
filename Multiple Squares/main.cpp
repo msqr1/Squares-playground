@@ -90,7 +90,7 @@ int_least32_t main() {
 		case JOINMENU: {
 			[&](){if (auth.dflag == 1) {
 				if (condition) {
-					later = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
+					later = std::chrono::steady_clock::now() + std::chrono::milliseconds(1000);
 					condition = false;
 				}
 				if (std::chrono::steady_clock::now() >= later) {
@@ -104,8 +104,14 @@ int_least32_t main() {
 			break;
 		}
 		case GAMEPLAY: {
+			set.events = POLLRDNORM | POLLWRNORM;
 			if (WSAPoll(&set, 1, 0) == 1 && (set.revents == (POLLRDNORM | POLLWRNORM))) {
-				processMsg(tsock, squares, tsqr, dest);
+				processMsg(tsock, squares, tsqr, dest);	
+			}
+			set.events = POLLWRNORM;
+			if (WSAPoll(&set, 1, 0) == 1 && set.revents == POLLWRNORM && std::chrono::steady_clock::now() >= later) {
+				later = std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(0.1 - deltat));
+				pUpdate(dest, tsock, tsqr);
 			}
 			//Handle this square
 			upr.handle_input(tsqr, 1/deltat)->handle_border_collision(tsqr)->draw_sqr(tsqr, namefont, tsqr.index);
@@ -147,7 +153,6 @@ int_least32_t main() {
 			iReq(dest, tsock, tsqr);
 			if (processMsg(tsock, squares, tsqr, dest) == 0) {
 				set.fd = tsock;
-				set.events = POLLRDNORM | POLLWRNORM;
 				hif.storage = std::to_string(dest.sin_port * 3);
 				std::cout << "Real joined port: " << ntohs(dest.sin_port) << '\n';
 				gamestate = GAMEPLAY;
