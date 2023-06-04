@@ -105,8 +105,7 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	return 0;
 }
 int pUpdate(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
-	Position_Update pos{ tsqr };
-	msg tosend{ pos };
+	msg tosend{ Position_Update(tsqr) };
 	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
 	return WSAGetLastError();
 }
