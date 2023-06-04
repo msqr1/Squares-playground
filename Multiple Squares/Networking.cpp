@@ -146,7 +146,7 @@ int processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 		}
 		case 1: {
 			Info_Request res{ std::get<1>(message) };
-			if (strcmp(res.name, tsqr.name) != 0) {
+			if (std::find_if(c.begin(), c.end(), [&](std::pair<const uint_least8_t, std::unique_ptr<Square>>& sqrpair)->bool {return strcmp(res.name, sqrpair.second->name) == 0;}) == c.end()) {
 				std::cout << "Received iReq: \n";
 				std::cout << "RGB: " << static_cast<int>(res.r) << ',' << static_cast<int>(res.g) << ',' << static_cast<int>(res.b) << "\n";
 				std::cout << "Name: " << res.name << '\n';
