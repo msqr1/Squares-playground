@@ -137,9 +137,11 @@ int processMsg(SOCKET& s, Sqrc& c, Square& tsqr, sockaddr_in& sin) {
 		switch (message.index()) {
 		case 0: {
 			Position_Update res{ std::get<0>(message) };
-			std::cout << "Received position update from index: " << static_cast<int>(res.index) << '\n';
-			(*c.at(res.index)).posx = res.x;
-			(*c.at(res.index)).posy = res.y;
+			if (c.contains(res.index)) {
+				std::cout << "Received position update from index: " << static_cast<int>(res.index) << '\n';
+				(*c.at(res.index)).posx = res.x;
+				(*c.at(res.index)).posy = res.y;
+			}
 			break;
 		}
 		case 1: {
