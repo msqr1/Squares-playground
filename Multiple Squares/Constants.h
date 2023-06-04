@@ -6,6 +6,7 @@ const std::string checkarray{ "$BNTu2SnlF)jV_-mEP7=y+0W3bax@OMYAK?hU1L&4G^~JvqoZ
 const std::string padarray{ "\"\',./[]\\" };
 constexpr char no{ 0 };
 constexpr char yes{ 1 };
+constexpr unsigned long timeout{ 1500 }; //timeout in miliseconds
 constexpr const char def_addr[14]{ "224.3.255.250" };
 constexpr uint_least8_t max_player{ 10 };
 enum state { MAINMENU, JOINMENU, GAMEPLAY, HOSTMENU, PREHOST, PREJOIN };

@@ -38,8 +38,7 @@ int joinRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, IPPROTO_IP, MCAST_JOIN_GROUP, (char*)&grstruct, sizeof(grstruct)) != 0) {
 		return WSAGetLastError();
 	}
-	DWORD timeo{ 1500 };
-	if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeo, sizeof(timeo)) != 0) {
+	if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) != 0) {
 		return WSAGetLastError();
 	}
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
@@ -89,8 +88,7 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	if (setsockopt(s, IPPROTO_IP, MCAST_JOIN_GROUP, (char*)&grstruct, sizeof(grstruct)) != 0) {
 		return WSAGetLastError();
 	}
-	DWORD timeo{ 1500 };
-	if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeo, sizeof(timeo)) != 0) {
+	if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) != 0) {
 		return WSAGetLastError();
 	}
 	if (bind(s, result->ai_addr, (int)result->ai_addrlen) != 0) {
