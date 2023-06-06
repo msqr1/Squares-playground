@@ -110,6 +110,7 @@ int pUpdate(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 		last = tsqr;
 		return WSAGetLastError();
 	}
+	return 0;
 }
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	msg tosend{ std::move(Info_Request{tsqr}) };
