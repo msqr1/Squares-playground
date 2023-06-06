@@ -2,8 +2,10 @@
 #include "Square.h"
 #include "updater.h"
 #include "menu.h"
+#include <chrono>
 #include <iostream>
 #undef main
+
 int_least32_t main() {
 	std::ios_base::sync_with_stdio(false);
 	//Init part
@@ -108,8 +110,8 @@ int_least32_t main() {
 			}
 			set.events = POLLWRNORM;
 			if (WSAPoll(&set, 1, 0) == 1 && set.revents == POLLWRNORM && std::chrono::steady_clock::now() >= later) {
-				pUpdate(dest, tsock, tsqr);
 				later = std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(0.1 - deltat));
+				pUpdate(dest, tsock, tsqr);
 			}
 			//Handle this square
 			upr.handle_input(tsqr, 1/deltat)->handle_border_collision(tsqr)->draw_sqr(tsqr, namefont, tsqr.index);
