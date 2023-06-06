@@ -15,10 +15,18 @@
 #pragma comment(lib,"iphlpapi.lib")
 #pragma comment(lib, "wininet.lib") 
 struct Position_Update {
-	double x{};
-	double y{};
+	uint_least16_t x{};
+	uint_least16_t y{};
 	uint_least8_t index{};
-	Position_Update(Square& tsqr) : x(tsqr.posx), y(tsqr.posy), index(tsqr.index) {};
+	Position_Update(Square& tsqr) : x(static_cast<uint_least16_t>(std::lround(tsqr.posx))), y(static_cast<uint_least16_t>(std::lround(tsqr.posy))), index(tsqr.index) {};
+	void operator=(Square& sqr) {
+		this->x = static_cast<uint_least16_t>(std::lround(sqr.posx));
+		this->y = static_cast<uint_least16_t>(std::lround(sqr.posy));
+	}
+	bool operator==(Square& sqr) {
+		return this->x == static_cast<uint_least16_t>(std::lround(sqr.posx)) && this->y == static_cast<uint_least16_t>(std::lround(sqr.posy));;
+	}
+	Position_Update() {};
 };
 struct Info_Request {
 	char name[16]{};

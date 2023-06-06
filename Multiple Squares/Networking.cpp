@@ -103,22 +103,26 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	return 0;
 }
 int pUpdate(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
-	msg tosend{ Position_Update(tsqr) };
-	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
-	return WSAGetLastError();
+	static Position_Update last{};
+	if (last != tsqr) {
+		msg tosend{ std::move(Position_Update{tsqr}) };
+		sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+		last = tsqr;
+		return WSAGetLastError();
+	}
 }
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
-	msg tosend{ Info_Request(tsqr) };
+	msg tosend{ std::move(Info_Request{tsqr}) };
 	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
 	return WSAGetLastError();
 }
 int iRep(sockaddr_in& sin, SOCKET& s, Square& tsqr, uint_least8_t newindex) {
-	msg tosend{ Info_Reply(tsqr, newindex) };
+	msg tosend{ std::move(Info_Reply{tsqr, newindex}) };
 	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
 	return WSAGetLastError();
 }
 int lReq(sockaddr_in& sin, SOCKET& s, uint_least8_t thisindex) {
-	msg tosend{ thisindex };
+	msg tosend{ std::move(thisindex) };
 	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
 	return WSAGetLastError();
 }
