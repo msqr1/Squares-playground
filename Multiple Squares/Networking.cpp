@@ -103,9 +103,17 @@ int prepareRoom(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	return 0;
 }
 int pUpdate(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
-	msg tosend{ Position_Update(tsqr) };
-	sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
-	return WSAGetLastError();
+	Position_Update pnow{ tsqr };
+	static std::pair<uint_least16_t, uint_least16_t> pos{};
+	if (pnow != pos){
+		msg tosend{ pnow };
+		std::cout << "Difference detected! Sent pUpdate\n";
+		sendto(s, (char*)&tosend, sizeof(msg), 0, (sockaddr*)&sin, sizeof(sin));
+		pos.first = pnow.x;
+		pos.second = pnow.y;
+		return WSAGetLastError();
+	}
+	return 0;
 }
 int iReq(sockaddr_in& sin, SOCKET& s, Square& tsqr) {
 	msg tosend{ Info_Request(tsqr) };

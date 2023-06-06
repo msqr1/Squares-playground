@@ -8,6 +8,7 @@
 #include <set>
 #include <numeric>
 #include <random>
+#include <chrono>
 #include <variant>
 #include "Square.h"
 #include "Constants.h"
@@ -15,10 +16,15 @@
 #pragma comment(lib,"iphlpapi.lib")
 #pragma comment(lib, "wininet.lib") 
 struct Position_Update {
-	double x{};
-	double y{};
+	uint_least16_t x{};
+	uint_least16_t y{};
+	std::chrono::steady_clock::time_point sendtime{};
 	uint_least8_t index{};
-	Position_Update(Square& tsqr) : x(tsqr.posx), y(tsqr.posy), index(tsqr.index) {};
+	Position_Update(Square& tsqr) : x(tsqr.posx), y(tsqr.posy), index(tsqr.index), sendtime(std::chrono::steady_clock::now()) {};
+	Position_Update() {};
+	bool operator==(std::pair<uint_least16_t, uint_least16_t> pos) {
+		return this->x == pos.first && this->y == pos.second;
+	};
 };
 struct Info_Request {
 	char name[16]{};
