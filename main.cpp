@@ -18,7 +18,7 @@ int_least32_t main() {
 	SDL_GetDesktopDisplayMode(0, &dm);
 	int_least32_t width{ static_cast<int_least32_t> (dm.w / 2) };
 	int_least32_t height{ static_cast<int_least32_t>(dm.h / 2) };
-	SDL_Window* win{ SDL_CreateWindow("Single/Multiple square(s)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED) };
+	SDL_Window* win{ SDL_CreateWindow("Squares playground", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED) };
 	SDL_Renderer* ren{ SDL_CreateRenderer(win, -1,  SDL_RENDERER_ACCELERATED) };
 	//Event List
 	SDL_Event ev{};
