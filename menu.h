@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 struct title {
-	const char* ttd{ "Multiple Squares" };
+	const char* ttd{ "Squares playground" };
 	const char* jointtd{ "Enter Code:" };
 	const char* hostttd{ "Select an option:" };
 	const SDL_Color color = { 0,0,0 };
@@ -45,7 +45,7 @@ struct lchost_b {
 	TTF_Font* font = TTF_OpenFont("arcadeclassic.ttf", 70);
 };
 struct phost_b {
-	const char* ttd{ "  Public Host " };
+	const char* ttd{ " Public host (coming soon) " };
 	SDL_Color color = { 0,0,0 };
 	SDL_Color selectcolor{ 255,255,0 };
 	const SDL_Color boxcolor{ 0,240,240 };
